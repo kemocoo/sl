@@ -4,4 +4,4 @@ numpy
 yfinance
 easyocr
 Pillow
-
+opencv-python-headless
