@@ -305,7 +305,7 @@ if st.button("🚀 Kapsamlı Taramayı Başlat", type="primary") and temiz_hisse
         
     st.success("Tarama Tamamlandı!")
     
-    # DataFrame oluştur ve Göster 
+    # DataFrame oluştur ve Göster (BURASI GÜNCELLENDİ)
     df = pd.DataFrame(sonuclar)
     
     def renk_ayarla(val):
@@ -317,4 +317,4 @@ if st.button("🚀 Kapsamlı Taramayı Başlat", type="primary") and temiz_hisse
         return ""
 
     stil_tablosu = df.style.map(renk_ayarla, subset=["Ana Sistem", "Özel Sinyal", "Yıldız", "AO (1 Hft)", "AO (1 Gün)", "AO (4 Saat)", "AO (2 Saat)"])
-    st.dataframe(stil_tablosu, use_container_width=True)
+    st.dataframe(stil_tablosu, width='stretch')
