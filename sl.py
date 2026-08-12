@@ -15,6 +15,14 @@ warnings.filterwarnings('ignore')
 st.set_page_config(page_title="Birleşik Radar Web v20 (Multi-Timeframe AO)", layout="wide", page_icon="🌟")
 
 # ==========================================
+# --- YAPAY ZEKA MOTORUNU HAFIZAYA ALMA ---
+# ==========================================
+# Bu kod bloğu, RAM çökmesini engellemek için modeli sadece 1 kez yükler.
+@st.cache_resource(show_spinner=False)
+def ocr_motorunu_baslat():
+    return easyocr.Reader(['en'], gpu=False, verbose=False)
+
+# ==========================================
 # --- MATEMATİK VE İNDİKATÖR SİSTEMLERİ ---
 # ==========================================
 
@@ -143,7 +151,7 @@ def ozel_ve_yildiz_hesapla(data):
     ssl_durum = "YUKARI" if data['SSL_Up'].iloc[-1] > data['SSL_Down'].iloc[-1] else "AŞAĞI"
     st_durum = "BUY" if st_dir.iloc[-1] == 1 else "SELL"
     
-    # SHA, Hull ve WT hesaplamaları (Basitleştirilmiş dönüşler)
+    # SHA, Hull ve WT hesaplamaları
     ema_o_sha = open_p.ewm(span=7, adjust=False).mean()
     ema_c_sha = close.ewm(span=7, adjust=False).mean()
     sha_durum = "YEŞİL" if ema_c_sha.iloc[-1] > ema_o_sha.iloc[-1] else "KIRMIZI"
@@ -221,9 +229,10 @@ with col2:
 temiz_hisseler = []
 
 if uploaded_file is not None:
-    with st.spinner("Görseldeki hisseler yapay zeka ile okunuyor..."):
+    with st.spinner("Görseldeki hisseler yapay zeka ile okunuyor... (Bu işlem sadece ilk seferde uzun sürer)"):
+        # Hafızaya alınmış okuyucuyu çağırıyoruz
+        reader = ocr_motorunu_baslat()
         image = Image.open(uploaded_file)
-        reader = easyocr.Reader(['en'], gpu=False, verbose=False)
         okunan_metin = " ".join(reader.readtext(np.array(image.convert('RGB')), detail=0))
         ham_hisseler = re.findall(r'\b[A-Z]{2,5}\b', okunan_metin)
         yasakli = {'INC', 'LLC', 'CORP', 'LTD', 'CO', 'THE', 'AND', 'BIST', 'TCMB', 'POLDY', 'GIB', 'YATIRIM', 'FON', 'AS', 'A.S', 'USD', 'EUR', 'TRY'}
@@ -305,7 +314,7 @@ if st.button("🚀 Kapsamlı Taramayı Başlat", type="primary") and temiz_hisse
         
     st.success("Tarama Tamamlandı!")
     
-    # DataFrame oluştur ve Göster (BURASI GÜNCELLENDİ)
+    # DataFrame oluştur ve Göster 
     df = pd.DataFrame(sonuclar)
     
     def renk_ayarla(val):
